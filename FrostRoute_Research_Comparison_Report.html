@@ -1,0 +1,573 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>FrostRoute — Research Paper Comparison Report</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Fira+Code:wght@400;500&display=swap');
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { font-family:'Inter',Arial,sans-serif; font-size:13.5px; line-height:1.75; color:#1a1f2e; background:#f0f2f8; }
+  .page { max-width:960px; margin:0 auto; background:#fff; box-shadow:0 6px 40px rgba(0,0,0,0.10); }
+
+  /* COVER */
+  .cover {
+    background: linear-gradient(135deg,#0f172a 0%,#1e3a5f 55%,#1d4ed8 100%);
+    color:#fff; padding:60px 64px 50px; position:relative; overflow:hidden;
+  }
+  .cover::before { content:''; position:absolute; top:-100px;right:-80px; width:380px;height:380px; border-radius:50%; background:rgba(255,255,255,0.04); }
+  .cover::after  { content:''; position:absolute; bottom:-60px;left:-40px;  width:240px;height:240px; border-radius:50%; background:rgba(255,255,255,0.03); }
+  .badge { display:inline-block; background:rgba(255,255,255,0.12); border:1px solid rgba(255,255,255,0.25); border-radius:20px; padding:4px 16px; font-size:10.5px; font-weight:700; letter-spacing:1.8px; text-transform:uppercase; margin-bottom:18px; }
+  .cover h1 { font-size:38px; font-weight:800; line-height:1.15; margin-bottom:8px; }
+  .cover h1 span { color:#60a5fa; }
+  .cover h2 { font-size:15px; font-weight:400; opacity:.8; margin-bottom:28px; }
+  .cover-tags { display:flex; flex-wrap:wrap; gap:10px; margin-top:28px; padding-top:22px; border-top:1px solid rgba(255,255,255,0.15); }
+  .cover-tag { background:rgba(255,255,255,0.1); border:1px solid rgba(255,255,255,0.2); border-radius:6px; padding:4px 14px; font-size:11.5px; }
+
+  /* CONTENT */
+  .content { padding:0 64px 60px; }
+
+  h2.sec { font-size:21px; font-weight:800; color:#1e3a5f; margin:50px 0 16px; padding-bottom:10px; border-bottom:3px solid #dbeafe; display:flex; align-items:center; gap:10px; }
+  h2.sec .num { background:#1e3a5f; color:#fff; width:30px;height:30px; border-radius:50%; display:flex;align-items:center;justify-content:center; font-size:13px; flex-shrink:0; }
+  h3.sub { font-size:15px; font-weight:700; color:#1d4ed8; margin:22px 0 10px; }
+
+  p { margin-bottom:12px; }
+
+  /* PAPER HEADER */
+  .paper-card {
+    border:2px solid #dbeafe; border-radius:12px; margin:20px 0; overflow:hidden;
+  }
+  .paper-header {
+    background:linear-gradient(90deg,#1e3a5f,#1d4ed8);
+    color:#fff; padding:16px 24px;
+    display:flex; align-items:flex-start; gap:14px;
+  }
+  .paper-num { background:rgba(255,255,255,0.2); border-radius:8px; padding:4px 12px; font-size:13px; font-weight:700; flex-shrink:0; margin-top:2px; }
+  .paper-title { font-weight:700; font-size:14px; line-height:1.4; }
+  .paper-meta { font-size:11.5px; opacity:.8; margin-top:3px; }
+  .paper-body { padding:20px 24px; }
+
+  /* COMPARISON TABLE */
+  .comp-table { width:100%; border-collapse:collapse; margin:18px 0; font-size:13px; }
+  .comp-table th { padding:11px 16px; text-align:left; font-weight:700; }
+  .comp-table td { padding:10px 16px; border-bottom:1px solid #e0e7ff; vertical-align:top; }
+  .comp-table tr:last-child td { border-bottom:none; }
+  .comp-table tr:nth-child(even) td { background:#f8faff; }
+  .col-aspect { background:#1e3a5f; color:#fff; width:160px; }
+  .col-paper  { background:#1d4ed8; color:#fff; }
+  .col-frost  { background:#059669; color:#fff; }
+  td.aspect { background:#f0f6ff; color:#1e3a5f; font-weight:700; font-size:12.5px; }
+  td.paper-val { color:#374151; }
+  td.frost-val { color:#065f46; font-weight:600; }
+
+  /* HIGHLIGHT BOX */
+  .highlight { background:#eff6ff; border-left:4px solid #1d4ed8; border-radius:0 8px 8px 0; padding:14px 20px; margin:16px 0; }
+  .highlight.green { background:#f0fdf4; border-left-color:#059669; }
+  .highlight.amber { background:#fffbeb; border-left-color:#d97706; }
+  .highlight strong { color:#1e3a5f; }
+  .highlight.green strong { color:#065f46; }
+  .highlight.amber strong { color:#92400e; }
+
+  /* CODE */
+  .code-block { background:#0f172a; color:#7dd3fc; font-family:'Fira Code',monospace; font-size:12px; line-height:1.7; padding:18px 22px; border-radius:8px; margin:14px 0; overflow-x:auto; white-space:pre; }
+  .code-block .cm { color:#475569; }
+  .code-block .kw { color:#f0abfc; }
+  .code-block .fn { color:#fbbf24; }
+  .code-block .st { color:#6ee7b7; }
+  .code-block .nu { color:#f87171; }
+
+  /* OVERALL COMPARISON */
+  .mega-table { width:100%; border-collapse:collapse; font-size:12.5px; margin:20px 0; }
+  .mega-table th { padding:12px 14px; text-align:center; font-weight:700; }
+  .mega-table td { padding:10px 14px; border:1px solid #e0e7ff; vertical-align:middle; }
+  .mega-table .feature-col { background:#f8faff; font-weight:600; color:#1e3a5f; text-align:left; }
+  .yes  { background:#dcfce7; color:#166534; text-align:center; font-weight:700; border-radius:4px; }
+  .no   { background:#fee2e2; color:#991b1b; text-align:center; font-weight:700; border-radius:4px; }
+  .part { background:#fef9c3; color:#854d0e; text-align:center; font-weight:700; border-radius:4px; }
+
+  /* VERDICT */
+  .verdict { background:linear-gradient(135deg,#1e3a5f,#1d4ed8); color:#fff; border-radius:14px; padding:28px 30px; margin:30px 0; }
+  .verdict h3 { font-size:18px; font-weight:800; margin-bottom:14px; }
+  .verdict ul { padding-left:22px; }
+  .verdict ul li { margin:7px 0; font-size:13.5px; opacity:.92; }
+
+  ul.styled { padding-left:20px; margin:10px 0; }
+  ul.styled li { margin:5px 0; }
+  ul.styled li::marker { color:#1d4ed8; }
+
+  .pill { display:inline-block; border-radius:20px; padding:2px 12px; font-size:11px; font-weight:700; }
+  .pill-blue  { background:#dbeafe; color:#1e40af; }
+  .pill-green { background:#d1fae5; color:#065f46; }
+  .pill-red   { background:#fee2e2; color:#991b1b; }
+
+  .footer { padding:24px 64px; border-top:1px solid #e0e7ff; text-align:center; font-size:11.5px; color:#94a3b8; }
+
+  @media print { body{background:#fff;} .page{box-shadow:none;} .paper-card{break-inside:avoid;} }
+</style>
+</head>
+<body>
+<div class="page">
+
+<!-- COVER -->
+<div class="cover">
+  <div class="badge">DAA Project — Research Paper Analysis</div>
+  <h1>❄️ <span>FrostRoute</span> vs Literature</h1>
+  <h2>A comparative study of our Dijkstra-based shortest path backend against 3 research papers</h2>
+  <p style="opacity:.75;font-size:13px;max-width:640px;">This report analyses the FrostRoute C backend implementation of Dijkstra's algorithm, identifies what each of three relevant research papers proposes, and systematically highlights what FrostRoute does differently, additionally, or better.</p>
+  <div class="cover-tags">
+    <span class="cover-tag">C Language Backend</span>
+    <span class="cover-tag">Dijkstra's Algorithm</span>
+    <span class="cover-tag">JSON API Output</span>
+    <span class="cover-tag">Visit-Order Tracking</span>
+    <span class="cover-tag">Undirected Weighted Graph</span>
+    <span class="cover-tag">stdin/stdout Interface</span>
+  </div>
+</div>
+
+<!-- CONTENT -->
+<div class="content">
+
+  <!-- SECTION 1: CODE ANALYSIS -->
+  <h2 class="sec"><span class="num">1</span> FrostRoute Backend — Code Analysis</h2>
+  <p>Before comparing with research papers, it is important to fully understand what our own backend does. The FrostRoute C program reads a graph description from stdin, runs Dijkstra's algorithm, and outputs a rich JSON object to stdout — making it usable as a backend engine for any frontend (web, mobile, visualizer).</p>
+
+  <h3 class="sub">Core Design Decisions in the Code</h3>
+
+  <div class="code-block"><span class="cm">/* Input format (stdin): */</span>
+<span class="nu">n</span> source target <span class="nu">m</span>       <span class="cm">// n = nodes, m = edges</span>
+u v w                  <span class="cm">// m lines: edge u-v with weight w (made bidirectional)</span>
+
+<span class="cm">/* Output format (stdout): */</span>
+{
+  <span class="st">"ok"</span>: true,
+  <span class="st">"source"</span>: 0,  <span class="st">"target"</span>: 5,
+  <span class="st">"distance"</span>: 14,           <span class="cm">// shortest path cost (null if unreachable)</span>
+  <span class="st">"path"</span>: [0, 2, 4, 5],    <span class="cm">// reconstructed shortest path</span>
+  <span class="st">"visitOrder"</span>: [0,1,2...], <span class="cm">// nodes in the ORDER Dijkstra visited them</span>
+  <span class="st">"distances"</span>: [0,3,5,null] <span class="cm">// shortest dist from source to EVERY node</span>
+}</div>
+
+  <h3 class="sub">Key Implementation Features</h3>
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px;margin:14px 0;">
+    <div class="highlight"><strong>Adjacency List via Linked List</strong><br/>Edges stored as chained Edge structs using a static pool (no malloc overhead). Efficient for sparse graphs.</div>
+    <div class="highlight"><strong>O(V²) Dijkstra (Linear Scan)</strong><br/>Uses a simple for-loop scan to find minimum instead of a heap. Correct and simple — suitable for V ≤ 256.</div>
+    <div class="highlight green"><strong>Parent Tracking + Path Reconstruction</strong><br/>parent[] array enables tracing back the exact shortest path from target to source, then reversing it.</div>
+    <div class="highlight green"><strong>Visit Order Capture</strong><br/>visitOrder[] records each node the moment it is finalized — enabling step-by-step algorithm replay in the frontend.</div>
+    <div class="highlight green"><strong>All-Node Distances Output</strong><br/>distances[] in JSON gives shortest distance from source to every reachable node — not just the target.</div>
+    <div class="highlight amber"><strong>Negative Weight Clamping</strong><br/>Any negative edge weight is silently clamped to 0. FrostRoute is intentionally designed for non-negative weights only (stated in the file header comment).</div>
+  </div>
+
+  <!-- SECTION 2: PAPER 1 -->
+  <h2 class="sec"><span class="num">2</span> Research Paper 1 — Shortest Path Finding Visualizer</h2>
+
+  <div class="paper-card">
+    <div class="paper-header">
+      <div class="paper-num">P1</div>
+      <div>
+        <div class="paper-title">Shortest Path Finding Visualizer — An E-Learning Web Tool</div>
+        <div class="paper-meta">Haldavanekar, Mahadwad, Dighe, Suryawanshi, Rai · IJRASET 2023 · DOI: 10.22214/ijraset.2023.53207</div>
+      </div>
+    </div>
+    <div class="paper-body">
+      <h3 class="sub">What the Paper Proposes</h3>
+      <p>This paper describes building a <strong>web-based e-learning visualizer</strong> for shortest path algorithms. It implements Dijkstra and DFS on a grid (lattice) structure where each cell is a node connected to its 4 neighbors (up, down, left, right). The goal is educational — helping students see how the algorithm traverses nodes through animation. Built using HTML, CSS, JavaScript, and React.</p>
+
+      <ul class="styled">
+        <li>Grid/lattice-based graph (not a general weighted graph with arbitrary edges)</li>
+        <li>All nodes connected to exactly 4 neighbors — equal weight movement</li>
+        <li>Algorithm Module computes shortest path; Node Module handles animation; Path Visualizer handles mouse interactions</li>
+        <li>Visualization only — no JSON output, no external API interface</li>
+        <li>Includes DFS as second algorithm alongside Dijkstra</li>
+        <li>Runs entirely in the browser — JavaScript only, no backend</li>
+      </ul>
+
+      <h3 class="sub">Comparison: Paper 1 vs FrostRoute</h3>
+      <table class="comp-table">
+        <tr>
+          <th class="col-aspect">Aspect</th>
+          <th class="col-paper">Paper 1 (Visualizer)</th>
+          <th class="col-frost">FrostRoute</th>
+        </tr>
+        <tr>
+          <td class="aspect">Graph Type</td>
+          <td class="paper-val">Fixed lattice/grid — each node has exactly 4 neighbors with equal weight</td>
+          <td class="frost-val">General undirected weighted graph — any node connected to any other with arbitrary weights</td>
+        </tr>
+        <tr>
+          <td class="aspect">Language</td>
+          <td class="paper-val">JavaScript + React (browser-only)</td>
+          <td class="frost-val">C (compiled native binary) — high performance, cross-platform</td>
+        </tr>
+        <tr>
+          <td class="aspect">Algorithm</td>
+          <td class="paper-val">Dijkstra + DFS (two algorithms)</td>
+          <td class="frost-val">Dijkstra only — focused, pure, and correctly handles non-negative weighted graphs</td>
+        </tr>
+        <tr>
+          <td class="aspect">Output</td>
+          <td class="paper-val">Visual animation in browser only — no structured data output</td>
+          <td class="frost-val">JSON with path, visitOrder, distances[], distance — structured API output that any frontend can consume</td>
+        </tr>
+        <tr>
+          <td class="aspect">Architecture</td>
+          <td class="paper-val">Monolithic frontend app — visualization and computation tightly coupled</td>
+          <td class="frost-val">Decoupled backend — FrostRoute is a pure computation engine; frontend is separate and receives JSON</td>
+        </tr>
+        <tr>
+          <td class="aspect">Visit Order</td>
+          <td class="paper-val">Shown via node animation — not explicitly exported as data</td>
+          <td class="frost-val">visitOrder[] exported in JSON — frontend uses this data to replay animation step-by-step</td>
+        </tr>
+        <tr>
+          <td class="aspect">All-Nodes Distance</td>
+          <td class="paper-val">Not provided — only shortest path to target is visualized</td>
+          <td class="frost-val">distances[] array gives shortest distance from source to ALL nodes simultaneously</td>
+        </tr>
+        <tr>
+          <td class="aspect">Scalability</td>
+          <td class="paper-val">Limited to grid size — not suitable for large real-world graphs</td>
+          <td class="frost-val">Up to 256 nodes, 4096 edges — configurable via MAX_NODES, MAX_EDGES constants</td>
+        </tr>
+      </table>
+
+      <div class="highlight green">
+        <strong>✅ What FrostRoute adds beyond Paper 1:</strong> FrostRoute handles arbitrary edge-weighted graphs (not just equal-weight grids), produces machine-readable JSON output (making it a reusable backend API), explicitly exports visitOrder[] as data so any frontend can drive animation, and provides all-node distance data simultaneously — all in a compiled, high-performance C binary rather than an interpreted browser script.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PAPER 2 -->
+  <h2 class="sec"><span class="num">3</span> Research Paper 2 — Optimized Dijkstra for Networked Systems (IoT)</h2>
+
+  <div class="paper-card">
+    <div class="paper-header">
+      <div class="paper-num">P2</div>
+      <div>
+        <div class="paper-title">Optimized Implementation of Dijkstra's Algorithm for Efficient Shortest Path Finding in Networked Systems</div>
+        <div class="paper-meta">IJRASET 2024 · DOI: 10.22214/ijraset.2024.65444</div>
+      </div>
+    </div>
+    <div class="paper-body">
+      <h3 class="sub">What the Paper Proposes</h3>
+      <p>This paper focuses on <strong>optimizing Dijkstra's algorithm for dynamic, large-scale networked systems</strong> such as IoT networks, smart city traffic systems, and telecommunications. It identifies the classical Dijkstra as a starting point and introduces optimizations to handle real-time data streams and adaptive routing. The paper evaluates performance under dynamic conditions where graph topology changes at runtime.</p>
+
+      <ul class="styled">
+        <li>Targets dynamic graphs — edge weights can change during runtime (live traffic, IoT sensor data)</li>
+        <li>Uses a <strong>priority queue (min-heap)</strong> for O((V + E) log V) performance — better than O(V²)</li>
+        <li>Incorporates <strong>real-time data streams</strong> — the graph is updated with live sensor/network data</li>
+        <li>Focuses on resource allocation and energy consumption in IoT contexts</li>
+        <li>Applied to smart city routing and telecommunications — practical engineering focus</li>
+        <li>Does not provide structured JSON output or a visualizer — purely algorithmic optimization paper</li>
+      </ul>
+
+      <h3 class="sub">Comparison: Paper 2 vs FrostRoute</h3>
+      <table class="comp-table">
+        <tr>
+          <th class="col-aspect">Aspect</th>
+          <th class="col-paper">Paper 2 (IoT Optimization)</th>
+          <th class="col-frost">FrostRoute</th>
+        </tr>
+        <tr>
+          <td class="aspect">Graph Dynamism</td>
+          <td class="paper-val">Dynamic graph — edge weights change at runtime; algorithm re-runs on updates</td>
+          <td class="frost-val">Static graph — graph is fully defined at input time; one computation per invocation</td>
+        </tr>
+        <tr>
+          <td class="aspect">Priority Queue</td>
+          <td class="paper-val">Uses min-heap priority queue — O((V+E) log V) time complexity</td>
+          <td class="frost-val">Uses linear scan over all nodes — O(V²) time complexity; simpler, correct for small graphs</td>
+        </tr>
+        <tr>
+          <td class="aspect">Target Scale</td>
+          <td class="paper-val">Large-scale real-world IoT networks with thousands of nodes</td>
+          <td class="frost-val">Small-to-medium graphs (≤256 nodes, ≤4096 edges) — ideal for academic/visualizer use</td>
+        </tr>
+        <tr>
+          <td class="aspect">Application Domain</td>
+          <td class="paper-val">IoT device routing, smart city traffic, telecommunications</td>
+          <td class="frost-val">General-purpose shortest path — works for any undirected weighted graph scenario</td>
+        </tr>
+        <tr>
+          <td class="aspect">Output Format</td>
+          <td class="paper-val">Performance metrics and routing tables — no JSON API output</td>
+          <td class="frost-val">JSON with path, visitOrder, distances[], distance — plug-and-play backend API</td>
+        </tr>
+        <tr>
+          <td class="aspect">Visit Order Export</td>
+          <td class="paper-val">Not tracked or exported — optimization paper only</td>
+          <td class="frost-val">visitOrder[] tracked and exported — enables step-by-step algorithm replay</td>
+        </tr>
+        <tr>
+          <td class="aspect">Implementation Language</td>
+          <td class="paper-val">Not specified (theoretical + pseudocode)</td>
+          <td class="frost-val">Fully implemented in C — production-ready compiled binary</td>
+        </tr>
+        <tr>
+          <td class="aspect">Negative Weights</td>
+          <td class="paper-val">Explicitly excluded (non-negative only)</td>
+          <td class="frost-val">Explicitly excluded; negative weights silently clamped to 0 as a safety measure</td>
+        </tr>
+      </table>
+
+      <div class="highlight green">
+        <strong>✅ What FrostRoute adds beyond Paper 2:</strong> FrostRoute provides a complete working implementation with structured JSON output — something Paper 2 lacks. While Paper 2 achieves better time complexity (O((V+E)logV) via heap), FrostRoute trades this for simplicity and three additional data outputs: visitOrder[], path[], and all-node distances[] — making it a complete visualizer backend rather than just a routing engine. FrostRoute also handles the full stdin→JSON pipeline making it language-agnostic and directly callable from any frontend.
+      </div>
+      <div class="highlight amber">
+        <strong>⚠️ Where Paper 2 is more advanced:</strong> Paper 2's use of a priority queue and dynamic graph updates makes it more suitable for production-scale real-time systems. FrostRoute's O(V²) approach would be slower for graphs with thousands of nodes — an acknowledged trade-off for simplicity in a DAA visualization project.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: PAPER 3 -->
+  <h2 class="sec"><span class="num">4</span> Research Paper 3 — Comprehensive Review of Shortest Path Algorithms for Network Routing</h2>
+
+  <div class="paper-card">
+    <div class="paper-header">
+      <div class="paper-num">P3</div>
+      <div>
+        <div class="paper-title">A Comprehensive Review of Shortest Path Algorithms for Network Routing</div>
+        <div class="paper-meta">AJRCOS 2025 (Under Peer Review) · SDI Article · Covers Dijkstra, Bellman-Ford, A*, ACO, Hybrid and AI-based methods</div>
+      </div>
+    </div>
+    <div class="paper-body">
+      <h3 class="sub">What the Paper Proposes</h3>
+      <p>This is a <strong>survey/review paper</strong> that classifies and compares all major shortest path algorithms used in network routing. It categorizes algorithms into three families: classical (Dijkstra, Bellman-Ford, Floyd-Warshall), heuristic (A*, Greedy Best-First, Ant Colony Optimization), and hybrid/AI-driven (reinforcement learning, blockchain-based routing). It discusses their applications across IoT, VANETs, and SDNs.</p>
+
+      <ul class="styled">
+        <li>Identifies Dijkstra as optimal for non-negative weight graphs in link-state routing protocols (OSPF, IS-IS)</li>
+        <li>Highlights Dijkstra's limitation: cannot handle negative edge weights — Bellman-Ford needed for that</li>
+        <li>Discusses A* as a heuristic improvement — uses domain knowledge (heuristic h(n)) to guide search faster</li>
+        <li>Discusses Ant Colony Optimization and Reinforcement Learning as advanced alternatives</li>
+        <li>Notes that classical algorithms like Dijkstra are the foundation of all modern routing — still the most widely used in practice</li>
+        <li>Identifies key challenges: scalability, dynamic topologies, security (route hijacking), energy efficiency</li>
+        <li>Does NOT implement any algorithm — purely a theoretical review paper</li>
+      </ul>
+
+      <h3 class="sub">Comparison: Paper 3 vs FrostRoute</h3>
+      <table class="comp-table">
+        <tr>
+          <th class="col-aspect">Aspect</th>
+          <th class="col-paper">Paper 3 (Survey)</th>
+          <th class="col-frost">FrostRoute</th>
+        </tr>
+        <tr>
+          <td class="aspect">Nature</td>
+          <td class="paper-val">Theoretical survey — compares algorithms, no implementation provided</td>
+          <td class="frost-val">Full working implementation — compiled C program with complete input/output pipeline</td>
+        </tr>
+        <tr>
+          <td class="aspect">Algorithm Scope</td>
+          <td class="paper-val">Reviews Dijkstra, Bellman-Ford, A*, Floyd-Warshall, ACO, RL-based routing</td>
+          <td class="frost-val">Implements Dijkstra exclusively — focused, correct, and purposeful</td>
+        </tr>
+        <tr>
+          <td class="aspect">Negative Weights</td>
+          <td class="paper-val">Paper identifies this as Dijkstra's core limitation — recommends Bellman-Ford for negative weights</td>
+          <td class="frost-val">Explicitly designed for non-negative weights; clamps negatives to 0 as a defensive measure</td>
+        </tr>
+        <tr>
+          <td class="aspect">Heuristic Search (A*)</td>
+          <td class="paper-val">Recommends A* for faster target-directed search using domain heuristics</td>
+          <td class="frost-val">FrostRoute uses pure Dijkstra — no heuristic. A* would require domain-specific distance estimates</td>
+        </tr>
+        <tr>
+          <td class="aspect">Output / API</td>
+          <td class="paper-val">No output format defined — survey only</td>
+          <td class="frost-val">Structured JSON output — distance, path, visitOrder, distances[], ok/error flag</td>
+        </tr>
+        <tr>
+          <td class="aspect">Scalability Discussion</td>
+          <td class="paper-val">Identifies that classical Dijkstra struggles at massive scale; recommends hybrid/AI methods</td>
+          <td class="frost-val">FrostRoute is bounded (256 nodes) — suitable for academic visualization; not meant for massive scale</td>
+        </tr>
+        <tr>
+          <td class="aspect">Error Handling</td>
+          <td class="paper-val">Not discussed — theoretical paper</td>
+          <td class="frost-val">Explicit error handling: bad header → JSON error, invalid n, negative weight clamping, unreachable target → null distance</td>
+        </tr>
+        <tr>
+          <td class="aspect">Path Reconstruction</td>
+          <td class="paper-val">Mentioned as part of Dijkstra — not implemented</td>
+          <td class="frost-val">Fully implemented with parent[] array and in-place reversal to produce correct source→target order</td>
+        </tr>
+        <tr>
+          <td class="aspect">Multi-Node Distance</td>
+          <td class="paper-val">SSSP (Single Source Shortest Path) property mentioned — dist to all nodes</td>
+          <td class="frost-val">Explicitly outputs distances[] for all n nodes — full SSSP result, not just target distance</td>
+        </tr>
+      </table>
+
+      <div class="highlight green">
+        <strong>✅ What FrostRoute adds beyond Paper 3:</strong> Paper 3 is a survey with no code. FrostRoute takes the classical Dijkstra that Paper 3 describes and extends it into a complete, production-usable backend with: a clean stdin/stdout interface, structured JSON API output, full path reconstruction, visit order tracking for animation, all-node distances, and proper error handling with graceful JSON error responses. FrostRoute is essentially the engineering realization of what Paper 3 only theorizes.
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 5: MASTER COMPARISON TABLE -->
+  <h2 class="sec"><span class="num">5</span> Master Feature Comparison — All Three Papers vs FrostRoute</h2>
+
+  <table class="mega-table">
+    <tr>
+      <th style="background:#1e3a5f;color:#fff;text-align:left;padding:12px 14px;width:220px;">Feature / Capability</th>
+      <th style="background:#1d4ed8;color:#fff;">Paper 1<br/><span style="font-weight:400;font-size:11px;">Visualizer (IJRASET 2023)</span></th>
+      <th style="background:#1d4ed8;color:#fff;">Paper 2<br/><span style="font-weight:400;font-size:11px;">IoT Optimization (IJRASET 2024)</span></th>
+      <th style="background:#1d4ed8;color:#fff;">Paper 3<br/><span style="font-weight:400;font-size:11px;">Survey (AJRCOS 2025)</span></th>
+      <th style="background:#059669;color:#fff;">FrostRoute<br/><span style="font-weight:400;font-size:11px;">Our Backend (C)</span></th>
+    </tr>
+    <tr>
+      <td class="feature-col">Working Implementation</td>
+      <td class="yes">✅ Yes (JS)</td>
+      <td class="part">⚠️ Partial</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ Yes (C)</td>
+    </tr>
+    <tr>
+      <td class="feature-col">General Weighted Graph</td>
+      <td class="no">❌ Grid only</td>
+      <td class="yes">✅ Yes</td>
+      <td class="yes">✅ Theory</td>
+      <td class="yes">✅ Yes</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Dijkstra's Algorithm</td>
+      <td class="yes">✅ Yes</td>
+      <td class="yes">✅ Yes (heap)</td>
+      <td class="yes">✅ Reviewed</td>
+      <td class="yes">✅ Yes (V²)</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Priority Queue (Heap)</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ Yes</td>
+      <td class="part">⚠️ Discussed</td>
+      <td class="no">❌ Linear scan</td>
+    </tr>
+    <tr>
+      <td class="feature-col">JSON API Output</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ Full JSON</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Path Reconstruction</td>
+      <td class="part">⚠️ Visual only</td>
+      <td class="no">❌ Not shown</td>
+      <td class="part">⚠️ Mentioned</td>
+      <td class="yes">✅ parent[] array</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Visit Order Export</td>
+      <td class="part">⚠️ Animated</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ visitOrder[]</td>
+    </tr>
+    <tr>
+      <td class="feature-col">All-Node Distances</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="part">⚠️ Mentioned</td>
+      <td class="yes">✅ distances[]</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Undirected Graph Support</td>
+      <td class="yes">✅ Grid</td>
+      <td class="no">❌ Directed</td>
+      <td class="part">⚠️ Both</td>
+      <td class="yes">✅ Bidirectional edges</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Error Handling (JSON)</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ JSON error flags</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Negative Weight Guard</td>
+      <td class="no">❌ No</td>
+      <td class="part">⚠️ Excluded</td>
+      <td class="part">⚠️ Discussed</td>
+      <td class="yes">✅ Clamp to 0</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Unreachable Node Handling</td>
+      <td class="no">❌ No</td>
+      <td class="no">❌ Not shown</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ null in JSON</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Frontend Decoupled</td>
+      <td class="no">❌ Tightly coupled</td>
+      <td class="yes">✅ Yes</td>
+      <td class="yes">✅ N/A</td>
+      <td class="yes">✅ Pure backend</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Dynamic Graph Support</td>
+      <td class="no">❌ No</td>
+      <td class="yes">✅ Yes</td>
+      <td class="yes">✅ Discussed</td>
+      <td class="no">❌ Static only</td>
+    </tr>
+    <tr>
+      <td class="feature-col">Language / Platform</td>
+      <td class="feature-col" style="font-weight:400;">JavaScript/React</td>
+      <td class="feature-col" style="font-weight:400;">Pseudocode</td>
+      <td class="feature-col" style="font-weight:400;">None (Survey)</td>
+      <td class="feature-col" style="font-weight:400; color:#065f46;">C (native binary)</td>
+    </tr>
+  </table>
+
+  <!-- SECTION 6: UNIQUE CONTRIBUTIONS -->
+  <h2 class="sec"><span class="num">6</span> What FrostRoute Uniquely Contributes</h2>
+  <p>After analyzing all three papers, the following features exist <strong>only in FrostRoute</strong> and are not found in any of the three research papers:</p>
+
+  <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px;margin:18px 0;">
+    <div class="highlight green">
+      <strong>🔷 Structured JSON API Contract</strong><br/>
+      FrostRoute outputs a well-defined JSON object with <code>ok</code>, <code>distance</code>, <code>path</code>, <code>visitOrder</code>, and <code>distances</code> fields. None of the papers define or implement such an interface. This makes FrostRoute a plug-and-play backend for any frontend technology.
+    </div>
+    <div class="highlight green">
+      <strong>🔷 visitOrder[] — Algorithm Replay Data</strong><br/>
+      The sequence in which Dijkstra finalizes each node is captured in visitOrder[]. This is the exact data a frontend needs to animate the algorithm step-by-step. No paper exports this as structured data.
+    </div>
+    <div class="highlight green">
+      <strong>🔷 Graceful Error Handling in JSON</strong><br/>
+      Invalid input produces <code>{"ok":false,"error":"bad header"}</code> — a machine-readable error response, not a crash or exception. Unreachable targets produce <code>"distance": null</code>. No paper implements this.
+    </div>
+    <div class="highlight green">
+      <strong>🔷 C Language Static Memory Model</strong><br/>
+      Using a static edge pool (no dynamic allocation) and fixed-size arrays, FrostRoute avoids memory fragmentation and heap allocation failures — important for a stable backend engine. None of the papers use this architecture.
+    </div>
+    <div class="highlight green">
+      <strong>🔷 Negative Weight Clamping</strong><br/>
+      Rather than crashing or producing wrong results on negative weights, FrostRoute clamps them to 0 and continues. This is a practical defensive design choice not found in any of the papers.
+    </div>
+    <div class="highlight green">
+      <strong>🔷 Dual-Direction Edge Addition</strong><br/>
+      Each undirected edge u→v is stored as both u→v and v→u in the adjacency list, making the graph truly undirected — correctly handled without requiring the input to list both directions.
+    </div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict">
+    <h3>🏁 Summary Verdict</h3>
+    <p style="opacity:.85;margin-bottom:16px;">FrostRoute sits at the intersection of what three different papers separately attempt — and goes further than each in its own way:</p>
+    <ul>
+      <li><strong>vs Paper 1 (Visualizer):</strong> FrostRoute generalizes from a fixed grid to any weighted graph, decouples backend from frontend, and exports structured data (visitOrder, distances) instead of just rendering pixels.</li>
+      <li><strong>vs Paper 2 (IoT Optimization):</strong> FrostRoute trades the O((V+E)logV) heap for a simpler O(V²) scan, but compensates with richer output — a full JSON API including path reconstruction, visit ordering, and all-node distances that Paper 2 never provides.</li>
+      <li><strong>vs Paper 3 (Survey):</strong> FrostRoute is the engineering realization of what Paper 3 only theorizes — a working, error-handling, API-friendly Dijkstra implementation that correctly addresses the algorithm's non-negative weight constraint and produces a complete SSSP result.</li>
+      <li><strong>Unique contributions:</strong> JSON API contract, visitOrder[] export, JSON error flags, static memory model, negative weight clamping — all absent from the literature reviewed.</li>
+    </ul>
+  </div>
+
+</div><!-- /content -->
+<div class="footer">
+  FrostRoute — DAA Project &nbsp;|&nbsp; Research Paper Comparative Analysis &nbsp;|&nbsp; Dijkstra's Algorithm Backend in C
+</div>
+</div>
+</body>
+</html>

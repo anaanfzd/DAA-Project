@@ -1,14 +1,83 @@
-# Smart Traffic Route Optimizer
+# ❄️ FrostRoute: High-Performance Cyber-Logistics Command Center
 
-With the rapid expansion of urban food delivery services and e-commerce logistics, optimizing delivery routes in real-time has become a computationally intensive challenge. Traditional web-based systems often struggle with performance limitations when processing complex city graph data and executing advanced pathfinding algorithms entirely within the browser.
+**FrostRoute** is an immersive, high-performance logistics command and pathfinding platform tailored for severe Arctic environments. It bridges an optimized, native compiled C-pathfinding engine with a premium, holographic-themed React dashboard powered by **A.U.R.A.** (Arctic Utility & Routing Assistant)—a voice-synthesized, vocal-enabled AI Tactical Copilot.
 
-This project introduces a Smart Traffic Route Optimizer, designed as a high-performance Logistics Command Center. To achieve maximum computational efficiency, the system employs a native C-based backend engine to implement core Design and Analysis of Algorithms (DAA) concepts, specifically Dijkstra’s Algorithm and the A* (A-Star) Algorithm for shortest path computation. The C engine is seamlessly integrated with a Node.js server through automated child-process execution, ensuring fast and efficient handling of heavy computations.
+---
 
-The frontend is developed as a fully immersive, fullscreen web application using React, Tailwind CSS, and Framer Motion, delivering a modern and highly responsive user interface. To enhance visualization, the project utilizes React Three Fiber for rendering an interactive 3D topological map of the delivery network, featuring dynamic edge visualization and real-time camera tracking.
+## 🛰️ Hybrid Architecture & Data Flow
 
-**Key features of the system include:**
-- Real-time comparison of algorithm performance (Dijkstra vs A*)
-- Interactive 3D map navigation for route visualization
-- Modular dashboards for Fleet Telemetry, Historical Route Logs, and Operational Analytics
+FrostRoute solves the performance and memory constraints of traditional web-based engines by offloading complex pathfinding to a native binary core.
 
-In conclusion, the Smart Traffic Route Optimizer provides a robust and scalable solution for modern logistics management. By offloading computationally intensive tasks to a C-based backend while leveraging advanced 3D web technologies for visualization, the system effectively overcomes browser limitations and delivers both high performance and an immersive user experience.
+```
+  ┌──────────────────────────────────────────────────────────┐
+  │              Operator Command HUD (React + TS)           │
+  └──────────────────────────┬───────────────────▲───────────┘
+               Voice Command │                   │ Dynamic Telemetry,
+              & Telemetry    │                   │ Paths & Vocal TTS
+                             ▼                   │
+  ┌──────────────────────────────────────────────┴───────────┐
+  │                 REST API Bridge (Express.js)             │
+  │        (Memory caching + Child-process spawning)         │
+  └──────────────────────────┬───────────────────▲───────────┘
+                STDIN Pipes  │                   │ STDOUT JSON
+                             ▼                   │
+  ┌──────────────────────────────────────────────┴───────────┐
+  │                 Native C Dijkstra Core (GCC)             │
+  │        (Adjacency list representations & Binary Min-Heaps)│
+  └──────────────────────────────────────────────────────────┘
+```
+
+* **High-Speed Pathfinding Core (C):** Core routing logic implemented in pure C (`dijkstra.c`) utilizing binary min-heaps to solve optimal routes instantly, completely offloading intensive calculations from Node.js/browser event loops.
+* **API Bridge (Express):** A Node.js backend acting as a middleware proxy. It interfaces with the compiled C executable via standard streams, adding a query caching layer for sub-millisecond response times.
+* **Holographic HUD (React + TS):** An interactive tactical frontend dashboard featuring smooth hardware-accelerated micro-animations, real-time threat calculators, and modular operational displays.
+
+---
+
+## ⚡ Core Capabilities
+
+* **🎙️ A.U.R.A. AI Copilot (v3.2):** Features full Text-to-Speech (TTS) vocal responses and integrates WebSpeech Speech-to-Text (STT) mic controls with a dynamic visualizer for hands-free routing overrides.
+* **🧠 Dual Cognitive Cores:** Interfaces with a **Local NLP Core** for fast offline command processing and a **Gemini Satellite Core** (via the Gemini API) for advanced deep-space cognitive analysis of operator prompts.
+* **🛡️ Biometric Auth & Role-Based Security:** Restricts operation based on operator clearance level:
+  * *Commander (Gold):* Unrestricted dispatching and override authorization.
+  * *Courier (Amber):* Mobilization and navigation under safety guides.
+  * *Analyst (Cyan):* Read-only telemetry access (calculators are strictly locked).
+* **⚠️ Automated Safety Overrides:** Actively enforces real-time safety protocols. If a Courier attempts to dispatch a delivery drone during a severe active Blizzard, A.U.R.A. instantly overrides the fleet to an **Ice Crawler**, calculates the safest ground route, and issues a vocal hazard alert.
+* **📊 Tactical HUD Route Briefing:** Automatically generates and vocally reads real-time contextual route analysis (hazard levels, step counts, environmental friction index) once a path is calculated.
+
+---
+
+## 🛠️ Getting Started
+
+### Prerequisites
+* A C Compiler (e.g., `gcc` or MSVC) installed and added to your system's Environment Variables (`PATH`).
+* [Node.js](https://nodejs.org/) (v18+) & `npm`.
+
+### Setup & Installation
+
+1. **Clone & Open Project:**
+   ```bash
+   git clone https://github.com/anaanfzd/DAA-Project.git
+   cd DAA-Project
+   ```
+
+2. **Initialize Backend (Server & C Compilation):**
+   ```bash
+   cd backend
+   npm install
+   npm run build:c   # Compiles dijkstra.c into a native binary executable
+   npm run dev       # Starts local backend API on http://localhost:5000
+   ```
+
+3. **Initialize Frontend:**
+   ```bash
+   cd ../frontend
+   npm install
+   npm run dev       # Starts Vite development server on http://localhost:5173
+   ```
+
+---
+
+## 💻 Tech Stack
+* **Frontend:** React 19, TypeScript, Vite, Tailwind CSS v4, Framer Motion, Lucide-React.
+* **Backend API:** Node.js, Express, Child Process STDIO API.
+* **Algorithms Core:** Pure C, Dijkstra Pathfinding (Binary Min-Heap).

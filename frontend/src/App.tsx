@@ -47,14 +47,20 @@ function Main({ onLogout }: { onLogout: () => void }) {
   }, [graphNodes])
 
   useEffect(() => {
-    fetchGraphData().then(data => {
-      if (data.ok) {
-        setGraphNodes(data.nodes)
-        setGraphEdges(data.edges)
-        setRestaurants(data.restaurants)
-        setGraphLoaded(true)
-      }
-    })
+    fetchGraphData()
+      .then(data => {
+        if (data.ok) {
+          setGraphNodes(data.nodes)
+          setGraphEdges(data.edges)
+          setRestaurants(data.restaurants)
+          setGraphLoaded(true)
+        } else {
+          setError(data.error || 'Failed to initialize graph data.')
+        }
+      })
+      .catch(err => {
+        setError(`Failed to connect to Command Center: ${err.message || err}`)
+      })
   }, [])
 
   const stepIndex = useVisitPlayback(visitOrder, routeVersion)
@@ -127,8 +133,22 @@ function Main({ onLogout }: { onLogout: () => void }) {
 
   if (!graphLoaded) {
     return (
-      <div className="grain relative h-screen w-screen flex items-center justify-center bg-frost-900">
-        <div className="text-white/50 animate-pulse text-sm tracking-widest uppercase">Initializing Command Center...</div>
+      <div className="grain relative h-screen w-screen flex flex-col items-center justify-center bg-frost-900 gap-4">
+        {error ? (
+          <div className="flex flex-col items-center gap-3 max-w-md text-center px-6">
+            <div className="text-red-400 font-mono text-xs uppercase tracking-widest border border-red-500/30 bg-red-500/10 px-4 py-2 rounded-xl">
+              Connection Failure
+            </div>
+            <div className="text-white/70 text-xs tracking-wide leading-relaxed">
+              {error}
+            </div>
+            <div className="text-white/30 text-[10px] uppercase tracking-wider mt-2">
+              Please check that your backend service on Render is running and your VITE_API_URL environment variable is configured in Vercel.
+            </div>
+          </div>
+        ) : (
+          <div className="text-white/50 animate-pulse text-sm tracking-widest uppercase">Initializing Command Center...</div>
+        )}
       </div>
     )
   }

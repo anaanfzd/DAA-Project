@@ -27,16 +27,19 @@ export interface GraphDataResponse {
   edges: GraphEdge[]
   restaurants: Restaurant[]
   nodeCount: number
+  error?: string
 }
 
+const API_BASE = (import.meta.env.VITE_API_URL || '').replace(/\/$/, '')
+
 export async function fetchGraphData(): Promise<GraphDataResponse> {
-  const res = await fetch('/api/graph')
+  const res = await fetch(`${API_BASE}/api/graph`)
   const data = await res.json()
   return data
 }
 
 export async function computeRoute(body: RouteRequestBody): Promise<RouteResponse> {
-  const res = await fetch('/api/route', {
+  const res = await fetch(`${API_BASE}/api/route`, {
     method: 'POST',
     headers: { 'Content-Type': 'application/json' },
     body: JSON.stringify(body),

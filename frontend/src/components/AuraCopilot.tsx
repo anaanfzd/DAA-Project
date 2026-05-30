@@ -3,7 +3,6 @@ import {
   Send,
   Terminal,
   Cpu,
-  AlertTriangle,
   Volume2,
   VolumeX,
   Settings,
@@ -241,7 +240,7 @@ export function AuraCopilot({
   onCustomerId,
   selectedRestaurant,
   onOptimize,
-  loading,
+  loading: _loading,
   path,
   distanceRaw
 }: AuraCopilotProps) {

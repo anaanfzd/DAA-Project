@@ -1,0 +1,40 @@
+# Dependency directories
+node_modules/
+**/node_modules/
+
+# Build and distribution directories
+frontend/dist/
+frontend/dist-ssr/
+dist/
+
+# Local environment and secret files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+*.local
+
+# Compiled C binaries, executables, and object files
+backend/dijkstra.exe
+backend/dijkstra
+*.exe
+*.o
+*.obj
+*.so
+*.dylib
+*.out
+
+# Editor configurations
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# System/OS files
+.DS_Store
+Thumbs.db

@@ -1,4 +1,4 @@
-import { spawn } from "child_process";
+import { spawn, execSync } from "child_process";
 import cors from "cors";
 import express from "express";
 import fs from "fs";
@@ -8,6 +8,20 @@ import { graphNodes, graphEdges, NODE_COUNT, restaurants } from "./data.js";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 const app = express();
+
+// Automatically compile dijkstra C binary on startup if missing
+const win = process.platform === "win32";
+const binaryName = win ? "dijkstra.exe" : "dijkstra";
+const binaryPathFile = path.join(__dirname, binaryName);
+if (!fs.existsSync(binaryPathFile)) {
+  console.log("Dijkstra binary not found. Attempting to compile on startup...");
+  try {
+    execSync("node build-c.js", { cwd: __dirname, stdio: "inherit" });
+    console.log("Dijkstra compiled successfully on startup!");
+  } catch (e) {
+    console.error("Failed to compile dijkstra on startup:", e);
+  }
+}
 
 app.use(cors());
 app.use(express.json({ limit: "2mb" }));

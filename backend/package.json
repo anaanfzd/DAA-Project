@@ -6,7 +6,8 @@
   "scripts": {
     "start": "node server.js",
     "dev": "node server.js",
-    "build:c": "node build-c.js"
+    "build:c": "node build-c.js",
+    "build": "npm run build:c"
   },
   "dependencies": {
     "cors": "^2.8.5",

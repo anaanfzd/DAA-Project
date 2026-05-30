@@ -6,6 +6,7 @@ import { useUser, SEEDED_OPERATORS, type OperatorRole } from '../context/UserCon
 export function Auth({ onLogin }: { onLogin: () => void }) {
   const { login, register } = useUser()
   const [isSignUp, setIsSignUp] = useState(false)
+  const [portalType, setPortalType] = useState<'operator' | 'customer'>('operator')
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
   const [name, setName] = useState('')
@@ -52,7 +53,8 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
     // Simulate scanning/handshaking first
     setTimeout(() => {
       if (isSignUp) {
-        const result = register(name, email, password, role)
+        const registrationRole = portalType === 'customer' ? 'customer' : role
+        const result = register(name, email, password, registrationRole)
         setScanning(false)
         setLoading(false)
         if (result.success) {
@@ -177,14 +179,50 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
           </p>
         </div>
 
+        {/* Portal Access Selector */}
+        <div className="mb-5 grid grid-cols-2 gap-2 p-1 glass rounded-2xl border border-white/5 bg-white/[0.01]">
+          <button
+            type="button"
+            onClick={() => {
+              setPortalType('operator')
+              setRole('courier')
+              setAuthError(null)
+            }}
+            className={`py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition cursor-pointer font-mono ${
+              portalType === 'operator'
+                ? 'bg-white/10 text-white border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.06)]'
+                : 'text-white/40 hover:text-white/70 border border-transparent'
+            }`}
+          >
+            [ Operator / Courier ]
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              setPortalType('customer')
+              setRole('customer')
+              setAuthError(null)
+            }}
+            className={`py-2 text-[10px] font-bold uppercase tracking-wider rounded-xl transition cursor-pointer font-mono ${
+              portalType === 'customer'
+                ? 'bg-white/10 text-white border border-white/10 shadow-[0_0_15px_rgba(255,255,255,0.06)]'
+                : 'text-white/40 hover:text-white/70 border border-transparent'
+            }`}
+          >
+            [ Customer Terminal ]
+          </button>
+        </div>
+
         {/* Quick Profiles Drawer (Only visible on Login/Decrypt tab) */}
         {!isSignUp && (
           <div className="mb-6 rounded-2xl border border-white/5 bg-white/[0.01] p-3 text-center">
             <p className="text-[9px] uppercase tracking-[0.25em] text-white/40 mb-2 font-mono flex items-center justify-center gap-1">
               <UserCheck className="h-3 w-3 text-emerald-400" /> Active Grid Profiles
             </p>
-            <div className="grid grid-cols-3 gap-2">
-              {SEEDED_OPERATORS.map((op) => (
+            <div className={`grid gap-2 ${portalType === 'customer' ? 'grid-cols-1 max-w-[200px] mx-auto' : 'grid-cols-3'}`}>
+              {SEEDED_OPERATORS.filter(op =>
+                portalType === 'customer' ? op.role === 'customer' : op.role !== 'customer'
+              ).map((op) => (
                 <button
                   key={op.email}
                   type="button"
@@ -195,7 +233,9 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
                         ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-300'
                         : op.role === 'courier'
                           ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
-                          : 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
+                          : op.role === 'customer'
+                            ? 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                            : 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
                       : 'border-white/5 bg-white/[0.01] text-white/50 hover:border-white/15 hover:text-white/80'
                   }`}
                 >
@@ -308,7 +348,7 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
             </div>
           </div>
 
-          {isSignUp && (
+          {isSignUp && portalType === 'operator' && (
             <div className="space-y-1.5">
               <label className="text-[10px] uppercase tracking-wider text-white/40 font-mono">Deck Clearance Role</label>
               <div className="grid grid-cols-3 gap-2 mt-1">

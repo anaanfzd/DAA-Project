@@ -57,3 +57,52 @@ export async function computeRoute(body: RouteRequestBody): Promise<RouteRespons
   }
   return data
 }
+
+export interface OrderItem {
+  name: string
+  qty: number
+  price: number
+}
+
+export interface Order {
+  id: string
+  customer: string
+  targetNode: number
+  restaurant: string
+  restaurantNode: number
+  items: OrderItem[]
+  total: number
+  path: number[]
+  visitOrder?: number[]
+  distance: number | null
+  vehicle: VehicleType
+  weather: WeatherLevel
+  status: 'pending' | 'in_transit' | 'delivered'
+  timestamp: string
+}
+
+export async function fetchOrders(): Promise<Order[]> {
+  const res = await fetch(`${API_BASE}/api/orders`)
+  const data = await res.json()
+  return data.orders || []
+}
+
+export async function createOrder(orderData: Partial<Order>): Promise<{ ok: boolean; order?: Order; error?: string }> {
+  const res = await fetch(`${API_BASE}/api/orders`, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify(orderData),
+  })
+  const data = await res.json()
+  return data
+}
+
+export async function updateOrderStatus(id: string, status: 'pending' | 'in_transit' | 'delivered'): Promise<{ ok: boolean; order?: Order; error?: string }> {
+  const res = await fetch(`${API_BASE}/api/orders/${id}/status`, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({ status }),
+  })
+  const data = await res.json()
+  return data
+}

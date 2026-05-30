@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode, useEffect } from 'react'
 
-export type OperatorRole = 'commander' | 'courier' | 'analyst'
+export type OperatorRole = 'commander' | 'courier' | 'analyst' | 'customer'
 
 export interface Operator {
   name: string
   email: string
   role: OperatorRole
   clearance: string
-  badgeColor: 'gold' | 'amber' | 'cyan'
+  badgeColor: 'gold' | 'amber' | 'cyan' | 'green'
 }
 
 interface UserContextValue {
@@ -43,6 +43,14 @@ export const SEEDED_OPERATORS = [
     role: 'analyst' as const,
     clearance: 'Level 3 - Telemetry',
     badgeColor: 'cyan' as const
+  },
+  {
+    name: 'Customer One',
+    email: 'customer@frostroute.com',
+    password: 'guest',
+    role: 'customer' as const,
+    clearance: 'Level 1 - Client',
+    badgeColor: 'green' as const
   }
 ]
 
@@ -103,8 +111,8 @@ export function UserProvider({ children }: { children: ReactNode }) {
     }
 
     // Map clearance details based on role
-    let clearance = 'Level 1 - Guest'
-    let badgeColor: 'gold' | 'amber' | 'cyan' = 'cyan'
+    let clearance = 'Level 1 - Client'
+    let badgeColor: 'gold' | 'amber' | 'cyan' | 'green' = 'green'
 
     if (role === 'commander') {
       clearance = 'Level 5 - Override'
@@ -115,6 +123,9 @@ export function UserProvider({ children }: { children: ReactNode }) {
     } else if (role === 'analyst') {
       clearance = 'Level 3 - Telemetry'
       badgeColor = 'cyan'
+    } else if (role === 'customer') {
+      clearance = 'Level 1 - Client'
+      badgeColor = 'green'
     }
 
     const newOp = {

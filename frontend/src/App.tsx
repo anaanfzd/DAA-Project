@@ -6,6 +6,8 @@ import { RouteMap, useVisitPlayback } from './components/RouteMap'
 import { SoundToggle } from './components/SoundToggle'
 import { SupplyPanel } from './components/SupplyPanel'
 import { Auth } from './components/Auth'
+import { CourierDashboard } from './components/CourierDashboard'
+import { CustomerDashboard } from './components/CustomerDashboard'
 import { CartProvider } from './context/CartContext'
 import { type Restaurant, type GraphNode, type GraphEdge, type VehicleType, type WeatherLevel } from './types'
 import { pointOnPolyline } from './utils/pathAgent'
@@ -359,6 +361,14 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <Auth onLogin={() => setIsAuthenticated(true)} />
+  }
+
+  if (currentUser?.role === 'courier') {
+    return <CourierDashboard onLogout={() => setIsAuthenticated(false)} />
+  }
+
+  if (currentUser?.role === 'customer') {
+    return <CustomerDashboard onLogout={() => setIsAuthenticated(false)} />
   }
 
   return (

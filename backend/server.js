@@ -241,6 +241,137 @@ app.post("/api/route", async (req, res) => {
   }
 });
 
+// Database for orders (persisted in JSON file)
+const ordersFile = path.join(__dirname, "orders.json");
+let ordersDb = [];
+
+if (fs.existsSync(ordersFile)) {
+  try {
+    ordersDb = JSON.parse(fs.readFileSync(ordersFile, "utf-8"));
+  } catch (e) {
+    ordersDb = [];
+  }
+} else {
+  // Seed initial orders
+  ordersDb = [
+    {
+      id: "ORD-9841",
+      customer: "Sector 9 - Habitation Hub",
+      targetNode: 9,
+      restaurant: "AeroBites Outpost",
+      restaurantNode: 2,
+      items: [
+        { name: "Thermo-Soup Packet", qty: 2, price: 12.50 },
+        { name: "Synthetic Protein Bar", qty: 1, price: 8.00 }
+      ],
+      total: 33.00,
+      path: [2, 1, 5, 9],
+      vehicle: "hoverbike",
+      weather: "clear",
+      status: "pending",
+      timestamp: new Date(Date.now() - 3600000).toISOString()
+    },
+    {
+      id: "ORD-7254",
+      customer: "Sector 11 - Research Lab",
+      targetNode: 11,
+      restaurant: "CryoKitchens Depot",
+      restaurantNode: 4,
+      items: [
+        { name: "Glacier Energy Drink", qty: 3, price: 6.00 }
+      ],
+      total: 18.00,
+      path: [4, 6, 8, 11],
+      vehicle: "crawler",
+      weather: "snow",
+      status: "in_transit",
+      timestamp: new Date(Date.now() - 1800000).toISOString()
+    }
+  ];
+  try {
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersDb, null, 2));
+  } catch (e) {
+    console.error("Failed to write seed orders:", e);
+  }
+}
+
+function saveOrdersDb() {
+  try {
+    fs.writeFileSync(ordersFile, JSON.stringify(ordersDb, null, 2));
+  } catch (e) {
+    console.error("Failed to save orders:", e);
+  }
+}
+
+// Order endpoints
+app.get("/api/orders", (req, res) => {
+  res.json({ ok: true, orders: ordersDb });
+});
+
+app.post("/api/orders", async (req, res) => {
+  try {
+    const {
+      customer,
+      targetNode,
+      restaurant,
+      restaurantNode,
+      items,
+      total,
+      vehicle = "hoverbike",
+      weather = "clear"
+    } = req.body;
+
+    if (typeof restaurantNode !== "number" || typeof targetNode !== "number") {
+      return res.status(400).json({ ok: false, error: "Invalid nodes" });
+    }
+
+    const edges = buildEdges(
+      graphEdges,
+      0.35,
+      "fastest",
+      vehicle,
+      weather
+    );
+    const result = await runDijkstra(NODE_COUNT, restaurantNode, targetNode, edges);
+
+    const newOrder = {
+      id: `ORD-${Math.floor(1000 + Math.random() * 9000)}`,
+      customer: customer || `Sector ${targetNode} - Local Client`,
+      targetNode,
+      restaurant,
+      restaurantNode,
+      items: items || [],
+      total: total || 0,
+      path: result.ok ? result.path : [],
+      visitOrder: result.ok ? result.visitOrder : [],
+      distance: result.ok ? result.distance : null,
+      vehicle,
+      weather,
+      status: "pending",
+      timestamp: new Date().toISOString()
+    };
+
+    ordersDb.unshift(newOrder);
+    saveOrdersDb();
+    res.json({ ok: true, order: newOrder });
+  } catch (e) {
+    res.status(500).json({ ok: false, error: String(e) });
+  }
+});
+
+app.put("/api/orders/:id/status", (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+  const order = ordersDb.find(o => o.id === id);
+  if (order) {
+    order.status = status;
+    saveOrdersDb();
+    res.json({ ok: true, order });
+  } else {
+    res.status(404).json({ ok: false, error: "Order not found" });
+  }
+});
+
 app.get("/api/health", (_req, res) => {
   res.json({
     ok: true,

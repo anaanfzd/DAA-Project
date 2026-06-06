@@ -8,6 +8,7 @@ import { SupplyPanel } from './components/SupplyPanel'
 import { Auth } from './components/Auth'
 import { CourierDashboard } from './components/CourierDashboard'
 import { CustomerDashboard } from './components/CustomerDashboard'
+import { AdminDashboard } from './components/AdminDashboard'
 import { CartProvider } from './context/CartContext'
 import { type Restaurant, type GraphNode, type GraphEdge, type VehicleType, type WeatherLevel } from './types'
 import { pointOnPolyline } from './utils/pathAgent'
@@ -361,6 +362,10 @@ function AppContent() {
 
   if (!isAuthenticated) {
     return <Auth onLogin={() => setIsAuthenticated(true)} />
+  }
+
+  if (currentUser?.role === 'admin') {
+    return <AdminDashboard onLogout={() => setIsAuthenticated(false)} />
   }
 
   if (currentUser?.role === 'courier') {

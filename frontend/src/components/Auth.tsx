@@ -221,7 +221,7 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
             </p>
             <div className={`grid gap-2 ${portalType === 'customer' ? 'grid-cols-1 max-w-[200px] mx-auto' : 'grid-cols-3'}`}>
               {SEEDED_OPERATORS.filter(op =>
-                portalType === 'customer' ? op.role === 'customer' : op.role !== 'customer'
+                portalType === 'customer' ? op.role === 'customer' : (op.role !== 'customer' && op.role !== 'commander')
               ).map((op) => (
                 <button
                   key={op.email}
@@ -229,8 +229,8 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
                   onClick={() => handleQuickFill(op.email, op.password)}
                   className={`py-1.5 px-2 rounded-lg border text-[10px] tracking-wide transition capitalize text-left cursor-pointer flex flex-col justify-between ${
                     email === op.email && !isSignUp
-                      ? op.role === 'commander'
-                        ? 'border-yellow-500/50 bg-yellow-500/10 text-yellow-300'
+                      ? op.role === 'admin'
+                        ? 'border-purple-500/50 bg-purple-500/10 text-purple-300'
                         : op.role === 'courier'
                           ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
                           : op.role === 'customer'
@@ -351,19 +351,17 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
           {isSignUp && portalType === 'operator' && (
             <div className="space-y-1.5">
               <label className="text-[10px] uppercase tracking-wider text-white/40 font-mono">Deck Clearance Role</label>
-              <div className="grid grid-cols-3 gap-2 mt-1">
-                {(['commander', 'courier', 'analyst'] as OperatorRole[]).map((r) => (
+              <div className="grid grid-cols-2 gap-2 mt-1">
+                {(['courier', 'analyst'] as OperatorRole[]).map((r) => (
                   <button
                     key={r}
                     type="button"
                     onClick={() => setRole(r)}
                     className={`py-2 rounded-lg border text-[10px] font-bold uppercase font-mono tracking-wider transition cursor-pointer ${
                       role === r
-                        ? r === 'commander'
-                          ? 'border-yellow-500 bg-yellow-500/10 text-yellow-400 shadow-[0_0_12px_rgba(234,179,8,0.2)]'
-                          : r === 'courier'
-                            ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
-                            : 'border-cyan-500 bg-cyan-500/10 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
+                        ? r === 'courier'
+                          ? 'border-amber-500 bg-amber-500/10 text-amber-400 shadow-[0_0_12px_rgba(245,158,11,0.2)]'
+                          : 'border-cyan-500 bg-cyan-500/10 text-cyan-400 shadow-[0_0_12px_rgba(6,182,212,0.2)]'
                         : 'border-white/5 bg-white/[0.01] text-white/40 hover:text-white hover:border-white/10'
                     }`}
                   >

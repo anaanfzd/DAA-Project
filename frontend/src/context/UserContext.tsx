@@ -1,13 +1,13 @@
 import { createContext, useContext, useState, useCallback, useMemo, type ReactNode, useEffect } from 'react'
 
-export type OperatorRole = 'commander' | 'courier' | 'analyst' | 'customer'
+export type OperatorRole = 'admin' | 'commander' | 'courier' | 'analyst' | 'customer'
 
 export interface Operator {
   name: string
   email: string
   role: OperatorRole
   clearance: string
-  badgeColor: 'gold' | 'amber' | 'cyan' | 'green'
+  badgeColor: 'gold' | 'amber' | 'cyan' | 'green' | 'purple'
 }
 
 interface UserContextValue {
@@ -22,11 +22,19 @@ const UserContext = createContext<UserContextValue | null>(null)
 export const SEEDED_OPERATORS = [
   {
     name: 'Anaan',
-    email: 'commander@frostroute.com',
+    email: 'admin@frostroute.com',
     password: 'admin',
-    role: 'commander' as const,
-    clearance: 'Level 5 - Override',
-    badgeColor: 'gold' as const
+    role: 'admin' as const,
+    clearance: 'Level 6 - Supreme Admin',
+    badgeColor: 'purple' as const
+  },
+  {
+    name: 'Dr. Sarah Stone',
+    email: 'sarah@frostroute.com',
+    password: 'sarah123',
+    role: 'admin' as const,
+    clearance: 'Level 6 - Supreme Admin',
+    badgeColor: 'purple' as const
   },
   {
     name: 'Alex Mercer',
@@ -35,14 +43,6 @@ export const SEEDED_OPERATORS = [
     role: 'courier' as const,
     clearance: 'Level 2 - Ground',
     badgeColor: 'amber' as const
-  },
-  {
-    name: 'Dr. Sarah Stone',
-    email: 'analyst@frostroute.com',
-    password: 'stats',
-    role: 'analyst' as const,
-    clearance: 'Level 3 - Telemetry',
-    badgeColor: 'cyan' as const
   },
   {
     name: 'Customer One',
@@ -112,9 +112,12 @@ export function UserProvider({ children }: { children: ReactNode }) {
 
     // Map clearance details based on role
     let clearance = 'Level 1 - Client'
-    let badgeColor: 'gold' | 'amber' | 'cyan' | 'green' = 'green'
+    let badgeColor: 'gold' | 'amber' | 'cyan' | 'green' | 'purple' = 'green'
 
-    if (role === 'commander') {
+    if (role === 'admin') {
+      clearance = 'Level 6 - Supreme Admin'
+      badgeColor = 'purple'
+    } else if (role === 'commander') {
       clearance = 'Level 5 - Override'
       badgeColor = 'gold'
     } else if (role === 'courier') {

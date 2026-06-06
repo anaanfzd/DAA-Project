@@ -146,10 +146,14 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
   }
 
 
+  const trackingOrderId = trackingOrder?.id
+  const trackingOrderStatus = trackingOrder?.status
+  const trackingOrderVehicle = trackingOrder?.vehicle
+
   // Animate transit along polyline path
   useEffect(() => {
-    if (!trackingOrder || trackingOrder.status !== 'in_transit') {
-      if (trackingOrder?.status === 'delivered') {
+    if (!trackingOrderId || trackingOrderStatus !== 'in_transit') {
+      if (trackingOrderStatus === 'delivered') {
         setAgentT(1)
       } else {
         setAgentT(0)
@@ -159,7 +163,7 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
 
     let raf = 0
     const start = performance.now()
-    const duration = trackingOrder.vehicle === 'drone' ? 8000 : (trackingOrder.vehicle === 'crawler' ? 18000 : 12000)
+    const duration = trackingOrderVehicle === 'drone' ? 8000 : (trackingOrderVehicle === 'crawler' ? 18000 : 12000)
 
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / duration)
@@ -172,7 +176,7 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [trackingOrder, isNavigating, routeVersion])
+  }, [trackingOrderId, trackingOrderStatus, trackingOrderVehicle, isNavigating, routeVersion])
 
   const currentPath = trackingOrder?.path || []
   const agent = useMemo(

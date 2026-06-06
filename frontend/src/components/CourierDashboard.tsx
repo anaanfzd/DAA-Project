@@ -116,10 +116,14 @@ export function CourierDashboard({ onLogout }: { onLogout: () => void }) {
     }
   }
 
+  const selectedOrderId = selectedOrder?.id
+  const selectedOrderStatus = selectedOrder?.status
+  const selectedOrderVehicle = selectedOrder?.vehicle
+
   // Simulate vehicle traversing the path in real-time if active in_transit
   useEffect(() => {
-    if (!selectedOrder || selectedOrder.status !== 'in_transit' || !isNavigating) {
-      if (selectedOrder?.status === 'delivered') {
+    if (!selectedOrderId || selectedOrderStatus !== 'in_transit' || !isNavigating) {
+      if (selectedOrderStatus === 'delivered') {
         setAgentT(1)
       } else {
         setAgentT(0)
@@ -130,7 +134,7 @@ export function CourierDashboard({ onLogout }: { onLogout: () => void }) {
     let raf = 0
     const start = performance.now()
     // Speed depends on vehicle type
-    const duration = selectedOrder.vehicle === 'drone' ? 8000 : (selectedOrder.vehicle === 'crawler' ? 18000 : 12000)
+    const duration = selectedOrderVehicle === 'drone' ? 8000 : (selectedOrderVehicle === 'crawler' ? 18000 : 12000)
 
     const tick = (now: number) => {
       const p = Math.min(1, (now - start) / duration)
@@ -144,7 +148,7 @@ export function CourierDashboard({ onLogout }: { onLogout: () => void }) {
     }
     raf = requestAnimationFrame(tick)
     return () => cancelAnimationFrame(raf)
-  }, [selectedOrder, isNavigating, routeVersion])
+  }, [selectedOrderId, selectedOrderStatus, selectedOrderVehicle, isNavigating, routeVersion])
 
   const currentPath = selectedOrder?.path || []
 

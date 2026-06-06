@@ -1,5 +1,5 @@
 import { AnimatePresence, motion } from 'framer-motion'
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useState, memo } from 'react'
 import type { GraphEdge, GraphNode } from '../types'
 
 type Props = {
@@ -11,6 +11,146 @@ type Props = {
   agent?: { x: number; y: number } | null
   stepIndex: number
 }
+
+// ── Memoized Background Edges Component ──
+const BackgroundLines = memo(({
+  edges,
+  nodes,
+  pathEdgeSet,
+  hasPath,
+}: {
+  edges: GraphEdge[]
+  nodes: GraphNode[]
+  pathEdgeSet: Set<string>
+  hasPath: boolean
+}) => {
+  return (
+    <>
+      {edges.map((e, i) => {
+        const a = nodes.find(n => n.id === e.from)
+        const b = nodes.find(n => n.id === e.to)
+        if (!a || !b) return null
+        const key = e.from < e.to ? `${e.from}-${e.to}` : `${e.to}-${e.from}`
+        const onPath = pathEdgeSet.has(key)
+
+        // Dim all non-path edges when a route exists
+        const opacity = hasPath ? (onPath ? 0 : 0.06) : 0.12
+
+        return (
+          <line
+            key={`bg-${i}`}
+            x1={a.x} y1={a.y}
+            x2={b.x} y2={b.y}
+            stroke="rgba(255,255,255,1)"
+            strokeWidth={0.3}
+            opacity={opacity}
+          />
+        )
+      })}
+    </>
+  )
+})
+
+BackgroundLines.displayName = 'BackgroundLines'
+
+// ── Memoized Node Component ──
+const MapNode = memo(({
+  node,
+  isPulse,
+  onPath,
+  isSource,
+  isTarget,
+  onVisit,
+  hasPath,
+}: {
+  node: GraphNode
+  isPulse: boolean
+  onPath: boolean
+  isSource: boolean
+  isTarget: boolean
+  onVisit: boolean
+  hasPath: boolean
+}) => {
+  const r = node.type === 'hub' ? 2.8 : node.type === 'customer' ? 2.6 : node.type === 'courier' ? 2.2 : 2.4
+
+  // Color logic
+  const fill = isSource
+    ? 'rgba(52,211,153,0.95)'   // emerald — start
+    : isTarget
+      ? 'rgba(251,191,36,0.95)'  // amber — destination
+      : onPath
+        ? 'rgba(255,255,255,0.95)' // white — on path
+        : onVisit
+          ? 'rgba(100,200,255,0.5)' // cyan — visited
+          : 'rgba(148,163,184,0.2)'  // dim — unvisited
+
+  const stroke = isSource
+    ? 'rgba(52,211,153,0.6)'
+    : isTarget
+      ? 'rgba(251,191,36,0.6)'
+      : onPath
+        ? 'rgba(255,255,255,0.5)'
+        : 'rgba(255,255,255,0.12)'
+
+  return (
+    <g>
+      {/* Pulse ring for source/target/pulseNode */}
+      {(isPulse || isSource || isTarget) && (
+        <motion.circle
+          cx={node.x} cy={node.y}
+          r={r * 2.2}
+          fill="none"
+          stroke={isSource ? 'rgba(52,211,153,0.25)' : isTarget ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.15)'}
+          strokeWidth={0.4}
+          animate={{ r: [r * 1.8, r * 2.8, r * 1.8], opacity: [0.4, 0.1, 0.4] }}
+          transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
+        />
+      )}
+
+      {/* Node circle */}
+      <motion.circle
+        cx={node.x} cy={node.y}
+        r={isPulse ? r * 1.15 : r}
+        fill={fill}
+        stroke={stroke}
+        strokeWidth={onPath ? 0.5 : 0.3}
+        filter={onPath ? 'url(#nodeglow)' : undefined}
+        animate={{ opacity: hasPath ? (onPath ? 1 : 0.3) : (onVisit ? 1 : 0.5) }}
+        transition={{ duration: 0.3 }}
+      />
+
+      {/* Node label */}
+      <text
+        x={node.x}
+        y={node.y - r - 1.2}
+        textAnchor="middle"
+        fill={onPath ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'}
+        fontSize={2.2}
+        fontWeight={onPath ? 700 : 400}
+        fontFamily="monospace"
+        style={{ pointerEvents: 'none' }}
+      >
+        {node.label || `N${node.id}`}
+      </text>
+
+      {/* Node ID badge */}
+      <text
+        x={node.x}
+        y={node.y + 1}
+        textAnchor="middle"
+        fill={isSource ? 'rgba(6,30,20,0.95)' : isTarget ? 'rgba(40,20,0,0.95)' : 'rgba(11,18,32,0.85)'}
+        fontSize={1.8}
+        fontWeight={700}
+        fontFamily="monospace"
+        style={{ pointerEvents: 'none' }}
+      >
+        {node.id}
+      </text>
+    </g>
+  )
+})
+
+MapNode.displayName = 'MapNode'
 
 export function RouteMap({
   nodes,
@@ -73,28 +213,13 @@ export function RouteMap({
           </marker>
         </defs>
 
-        {/* ── All background edges (dim) ── */}
-        {edges.map((e, i) => {
-          const a = nodes.find(n => n.id === e.from)
-          const b = nodes.find(n => n.id === e.to)
-          if (!a || !b) return null
-          const key = e.from < e.to ? `${e.from}-${e.to}` : `${e.to}-${e.from}`
-          const onPath = pathEdgeSet.has(key)
-
-          // Dim all non-path edges when a route exists
-          const opacity = hasPath ? (onPath ? 0 : 0.06) : 0.12
-
-          return (
-            <line
-              key={`bg-${i}`}
-              x1={a.x} y1={a.y}
-              x2={b.x} y2={b.y}
-              stroke="rgba(255,255,255,1)"
-              strokeWidth={0.3}
-              opacity={opacity}
-            />
-          )
-        })}
+        {/* ── Memoized background edges ── */}
+        <BackgroundLines
+          edges={edges}
+          nodes={nodes}
+          pathEdgeSet={pathEdgeSet}
+          hasPath={hasPath}
+        />
 
         {/* ── Dijkstra exploration animation edges ── */}
         {visitOrder.length > 0 && !done && edges.map((e, i) => {
@@ -139,7 +264,7 @@ export function RouteMap({
           )
         })}
 
-        {/* ── Nodes ── */}
+        {/* ── Memoized Nodes ── */}
         {nodes.map(n => {
           const isPulse = pulseNode === n.id
           const onPath = pathNodeSet.has(n.id)
@@ -147,82 +272,17 @@ export function RouteMap({
           const isTarget = path[path.length - 1] === n.id
           const onVisit = visited.has(n.id)
 
-          const r = n.type === 'hub' ? 2.8 : n.type === 'customer' ? 2.6 : n.type === 'courier' ? 2.2 : 2.4
-
-          // Color logic
-          const fill = isSource
-            ? 'rgba(52,211,153,0.95)'   // emerald — start
-            : isTarget
-              ? 'rgba(251,191,36,0.95)'  // amber — destination
-              : onPath
-                ? 'rgba(255,255,255,0.95)' // white — on path
-                : onVisit
-                  ? 'rgba(100,200,255,0.5)' // cyan — visited
-                  : 'rgba(148,163,184,0.2)'  // dim — unvisited
-
-          const stroke = isSource
-            ? 'rgba(52,211,153,0.6)'
-            : isTarget
-              ? 'rgba(251,191,36,0.6)'
-              : onPath
-                ? 'rgba(255,255,255,0.5)'
-                : 'rgba(255,255,255,0.12)'
-
           return (
-            <g key={n.id}>
-              {/* Pulse ring for source/target/pulseNode */}
-              {(isPulse || isSource || isTarget) && (
-                <motion.circle
-                  cx={n.x} cy={n.y}
-                  r={r * 2.2}
-                  fill="none"
-                  stroke={isSource ? 'rgba(52,211,153,0.25)' : isTarget ? 'rgba(251,191,36,0.25)' : 'rgba(255,255,255,0.15)'}
-                  strokeWidth={0.4}
-                  animate={{ r: [r * 1.8, r * 2.8, r * 1.8], opacity: [0.4, 0.1, 0.4] }}
-                  transition={{ repeat: Infinity, duration: 2, ease: 'easeInOut' }}
-                />
-              )}
-
-              {/* Node circle */}
-              <motion.circle
-                cx={n.x} cy={n.y}
-                r={isPulse ? r * 1.15 : r}
-                fill={fill}
-                stroke={stroke}
-                strokeWidth={onPath ? 0.5 : 0.3}
-                filter={onPath ? 'url(#nodeglow)' : undefined}
-                animate={{ opacity: hasPath ? (onPath ? 1 : 0.3) : (onVisit ? 1 : 0.5) }}
-                transition={{ duration: 0.3 }}
-              />
-
-              {/* Node label */}
-              <text
-                x={n.x}
-                y={n.y - r - 1.2}
-                textAnchor="middle"
-                fill={onPath ? 'rgba(255,255,255,0.9)' : 'rgba(255,255,255,0.3)'}
-                fontSize={2.2}
-                fontWeight={onPath ? 700 : 400}
-                fontFamily="monospace"
-                style={{ pointerEvents: 'none' }}
-              >
-                {n.label || `N${n.id}`}
-              </text>
-
-              {/* Node ID badge */}
-              <text
-                x={n.x}
-                y={n.y + 1}
-                textAnchor="middle"
-                fill={isSource ? 'rgba(6,30,20,0.95)' : isTarget ? 'rgba(40,20,0,0.95)' : 'rgba(11,18,32,0.85)'}
-                fontSize={1.8}
-                fontWeight={700}
-                fontFamily="monospace"
-                style={{ pointerEvents: 'none' }}
-              >
-                {n.id}
-              </text>
-            </g>
+            <MapNode
+              key={n.id}
+              node={n}
+              isPulse={isPulse}
+              onPath={onPath}
+              isSource={isSource}
+              isTarget={isTarget}
+              onVisit={onVisit}
+              hasPath={hasPath}
+            />
           )
         })}
 

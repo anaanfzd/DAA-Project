@@ -813,25 +813,84 @@ Provide your response strictly in the following JSON format:
       </AnimatePresence>
 
       {/* Ambient Diagnostic Monitor Grid */}
-      <div className="px-4 py-2 border-b border-white/5 bg-black/10 shrink-0 text-[10px] grid grid-cols-4 gap-1.5">
-        <div className="rounded border border-white/5 bg-white/[0.01] p-1 text-center">
-          <p className="text-white/30 uppercase text-[8px] font-light">Grid Threat</p>
-          <p className={`font-semibold mt-0.5 ${threatRating > 60 ? 'text-red-400 animate-pulse' : threatRating > 30 ? 'text-amber-400' : 'text-emerald-400'}`}>
-            {threatRating}% {threatRating > 60 ? 'HIGH' : threatRating > 30 ? 'ALERT' : 'NOMINAL'}
+      <div className="px-3 py-2 border-b border-white/5 bg-black/10 shrink-0 space-y-1.5">
+
+        {/* Row 1: Grid Threat (read-only) */}
+        <div className="rounded border border-white/5 bg-white/[0.01] px-2 py-1 flex items-center justify-between">
+          <p className="text-white/30 uppercase text-[8px] font-light font-mono">Grid Threat</p>
+          <p className={`font-semibold text-[10px] font-mono ${threatRating > 60 ? 'text-red-400 animate-pulse' : threatRating > 30 ? 'text-amber-400' : 'text-emerald-400'}`}>
+            {threatRating}% — {threatRating > 60 ? 'HIGH' : threatRating > 30 ? 'ALERT' : 'NOMINAL'}
           </p>
         </div>
-        <div className="rounded border border-white/5 bg-white/[0.01] p-1 text-center">
-          <p className="text-white/30 uppercase text-[8px] font-light">Hazards</p>
-          <p className="font-semibold text-white/80 mt-0.5 uppercase">{weather}</p>
+
+        {/* Row 2: Hazards selector */}
+        <div className="rounded border border-white/5 bg-white/[0.01] px-2 py-1.5">
+          <p className="text-white/30 uppercase text-[8px] font-light font-mono mb-1">Hazards</p>
+          <div className="flex gap-1">
+            {(['clear', 'snow', 'blizzard'] as const).map(w => (
+              <button
+                key={w}
+                onClick={() => onWeather(w)}
+                className={`flex-1 py-0.5 rounded text-[9px] font-bold uppercase font-mono tracking-wider border transition cursor-pointer ${
+                  weather === w
+                    ? w === 'blizzard'
+                      ? 'border-red-500/50 bg-red-500/10 text-red-300'
+                      : w === 'snow'
+                        ? 'border-cyan-500/50 bg-cyan-500/10 text-cyan-300'
+                        : 'border-emerald-500/50 bg-emerald-500/10 text-emerald-300'
+                    : 'border-white/5 bg-white/[0.01] text-white/30 hover:text-white/60 hover:border-white/15'
+                }`}
+              >
+                {w}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="rounded border border-white/5 bg-white/[0.01] p-1 text-center">
-          <p className="text-white/30 uppercase text-[8px] font-light">Active Fleet</p>
-          <p className="font-semibold text-white/80 mt-0.5 uppercase truncate">{vehicle}</p>
+
+        {/* Row 3: Active Fleet selector */}
+        <div className="rounded border border-white/5 bg-white/[0.01] px-2 py-1.5">
+          <p className="text-white/30 uppercase text-[8px] font-light font-mono mb-1">Active Fleet</p>
+          <div className="flex gap-1">
+            {(['hoverbike', 'drone', 'crawler'] as const).map(v => (
+              <button
+                key={v}
+                onClick={() => onVehicle(v)}
+                className={`flex-1 py-0.5 rounded text-[9px] font-bold uppercase font-mono tracking-wider border transition cursor-pointer ${
+                  vehicle === v
+                    ? v === 'drone'
+                      ? 'border-purple-500/50 bg-purple-500/10 text-purple-300'
+                      : v === 'crawler'
+                        ? 'border-amber-500/50 bg-amber-500/10 text-amber-300'
+                        : 'border-blue-500/50 bg-blue-500/10 text-blue-300'
+                    : 'border-white/5 bg-white/[0.01] text-white/30 hover:text-white/60 hover:border-white/15'
+                }`}
+              >
+                {v === 'hoverbike' ? 'Bike' : v === 'drone' ? 'Drone' : 'Crawlr'}
+              </button>
+            ))}
+          </div>
         </div>
-        <div className="rounded border border-white/5 bg-white/[0.01] p-1 text-center">
-          <p className="text-white/30 uppercase text-[8px] font-light">Target</p>
-          <p className="font-semibold text-white/80 mt-0.5 font-mono">NODE {customerId}</p>
+
+        {/* Row 4: Target Node selector */}
+        <div className="rounded border border-white/5 bg-white/[0.01] px-2 py-1.5">
+          <p className="text-white/30 uppercase text-[8px] font-light font-mono mb-1">Target Node</p>
+          <div className="flex gap-1">
+            {[9, 11, 12].map(node => (
+              <button
+                key={node}
+                onClick={() => onCustomerId(node)}
+                className={`flex-1 py-0.5 rounded text-[9px] font-bold font-mono border transition cursor-pointer ${
+                  customerId === node
+                    ? 'border-white/40 bg-white/10 text-white'
+                    : 'border-white/5 bg-white/[0.01] text-white/30 hover:text-white/60 hover:border-white/15'
+                }`}
+              >
+                {node === 9 ? 'Home·9' : node === 11 ? 'Work·11' : 'Gym·12'}
+              </button>
+            ))}
+          </div>
         </div>
+
       </div>
 
       {/* real-time AI Tactical Route Briefing HUD */}

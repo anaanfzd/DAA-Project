@@ -221,7 +221,7 @@ export function Auth({ onLogin }: { onLogin: () => void }) {
             </p>
             <div className={`grid gap-2 ${portalType === 'customer' ? 'grid-cols-1 max-w-[200px] mx-auto' : 'grid-cols-3'}`}>
               {SEEDED_OPERATORS.filter(op =>
-                portalType === 'customer' ? op.role === 'customer' : (op.role !== 'customer' && op.role !== 'commander')
+                portalType === 'customer' ? op.role === 'customer' : (op.role !== 'customer' && (op.role as string) !== 'commander')
               ).map((op) => (
                 <button
                   key={op.email}

@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo, useCallback } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
-import { LogOut, Shield, Sparkles, Navigation, Plus, Minus, ClipboardList, Activity } from 'lucide-react'
+import { LogOut, Sparkles, Navigation, Plus, Minus } from 'lucide-react'
 import { useUser } from '../context/UserContext'
 import { fetchOrders, createOrder, type Order, fetchGraphData } from '../api/routeClient'
 import { RouteMap } from './RouteMap'
@@ -26,16 +26,12 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
   const [weather, setWeather] = useState<WeatherLevel>('clear')
   const [traffic, setTraffic] = useState(0.35)
   const [mode, setMode] = useState<'fastest' | 'least_traffic'>('fastest')
-
-  // Right panel tab
-  const [activeRightTab, setActiveRightTab] = useState<'orders' | 'aura'>('orders')
   
   // Tracking
-  const [myOrders, setMyOrders] = useState<Order[]>([])
   const [trackingOrder, setTrackingOrder] = useState<Order | null>(null)
   const [agentT, setAgentT] = useState(0)
   const [isNavigating, setIsNavigating] = useState(false)
-  const [routeVersion, setRouteVersion] = useState(0)
+  const [routeVersion] = useState(0)
 
   // Fetch initial graph and kitchen lists
   useEffect(() => {
@@ -53,13 +49,10 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
     })
   }, [])
 
-  // Sync customer orders from backend database
+  // Sync tracking order status from backend
   const loadMyOrders = useCallback(async () => {
     try {
       const allOrders = await fetchOrders()
-      // Filter orders placed by this customer conceptually or display all orders for this customer demo
-      setMyOrders(allOrders)
-      
       // Update selected tracking order status
       if (trackingOrder) {
         const matching = allOrders.find(o => o.id === trackingOrder.id)
@@ -152,16 +145,6 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
     }
   }
 
-  // Handle selected order tracking
-  const handleTrackOrder = (order: Order) => {
-    setTrackingOrder(order)
-    setAgentT(0)
-    setIsNavigating(order.status === 'in_transit')
-    setRouteVersion(prev => prev + 1)
-    
-    const statusText = `Tracking order ${order.id.slice(-4)}. Courier delivery is currently ${order.status.replace('_', ' ')}.`
-    speakStatusUpdate(statusText)
-  }
 
   // Animate transit along polyline path
   useEffect(() => {
@@ -479,135 +462,25 @@ export function CustomerDashboard({ onLogout }: { onLogout: () => void }) {
           </div>
         </section>
 
-        {/* Right Panel - Tabbed Orders / A.U.R.A. */}
-        <section className="w-96 shrink-0 flex flex-col h-full z-10 gap-3">
-
-          {/* Tab Switcher */}
-          <div className="shrink-0 flex items-center justify-between p-1 glass rounded-2xl border border-white/10 bg-white/[0.02]">
-            <button
-              onClick={() => setActiveRightTab('orders')}
-              className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[11px] font-medium uppercase tracking-wider rounded-xl transition cursor-pointer ${
-                activeRightTab === 'orders'
-                  ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.06)]'
-                  : 'text-white/40 hover:text-white/70'
-              }`}
-            >
-              <ClipboardList className="h-3.5 w-3.5" />
-              Order History
-            </button>
-            <button
-              onClick={() => setActiveRightTab('aura')}
-              className={`flex-1 flex items-center justify-center gap-2 py-1.5 text-[11px] font-medium uppercase tracking-wider rounded-xl relative transition cursor-pointer ${
-                activeRightTab === 'aura'
-                  ? 'bg-white/10 text-white shadow-[0_0_20px_rgba(255,255,255,0.06)]'
-                  : 'text-white/40 hover:text-white/70'
-              }`}
-            >
-              <Activity className="h-3.5 w-3.5 text-emerald-400" />
-              A.U.R.A. TAC-AI
-              <span className="absolute right-3.5 top-3.5 h-1.5 w-1.5 rounded-full bg-emerald-400 animate-pulse" />
-            </button>
-          </div>
-
-          {/* Tab Content */}
-          <div className="flex-1 min-h-0">
-            <AnimatePresence mode="wait">
-              {activeRightTab === 'orders' ? (
-                <motion.div
-                  key="orders"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full glass rounded-3xl border border-white/10 flex flex-col p-5 font-mono text-xs space-y-4 overflow-hidden"
-                >
-                  <div className="flex items-center justify-between border-b border-white/10 pb-3 shrink-0">
-                    <span className="font-bold text-white tracking-wider uppercase">Order Registries</span>
-                    <span className="text-[8px] text-white/30 border border-white/10 px-2 py-0.5 rounded uppercase">History</span>
-                  </div>
-
-                  <div className="flex-1 overflow-y-auto space-y-3 pr-1 scrollbar-thin">
-                    {myOrders.length === 0 ? (
-                      <p className="text-xs text-white/30 text-center py-8 font-sans">No orders recorded in your history.</p>
-                    ) : (
-                      myOrders.map((o) => (
-                        <button
-                          key={o.id}
-                          onClick={() => handleTrackOrder(o)}
-                          className={`w-full text-left rounded-xl border p-3 transition-all ${
-                            trackingOrder?.id === o.id
-                              ? 'border-emerald-500/40 bg-emerald-500/[0.04]'
-                              : 'border-white/5 bg-white/[0.01] hover:border-white/10 hover:bg-white/[0.02]'
-                          }`}
-                        >
-                          <div className="flex justify-between items-center mb-1">
-                            <span className="text-xs font-bold text-white">{o.id}</span>
-                            <span className={`text-[8px] uppercase px-1.5 py-0.2 rounded font-bold border ${
-                              o.status === 'pending'
-                                ? 'border-cyan-500/30 text-cyan-400 bg-cyan-500/5'
-                                : o.status === 'in_transit'
-                                  ? 'border-amber-500/30 text-amber-400 bg-amber-500/5'
-                                  : 'border-emerald-500/30 text-emerald-400 bg-emerald-500/5'
-                            }`}>
-                              {o.status.replace('_', ' ')}
-                            </span>
-                          </div>
-                          <p className="text-[10px] text-white/60 font-sans truncate">{o.restaurant}</p>
-                          <div className="flex justify-between items-center mt-2 border-t border-white/5 pt-1.5 text-[9px] text-white/40 font-mono">
-                            <span>Node {o.targetNode}</span>
-                            <span className="font-bold text-white/70">${o.total.toFixed(2)}</span>
-                          </div>
-                        </button>
-                      ))
-                    )}
-                  </div>
-
-                  {/* A.U.R.A Status blurb */}
-                  <div className="border-t border-white/10 pt-3 bg-white/[0.01] rounded-2xl p-3 border border-white/5 text-[10px] space-y-1 text-white/60 leading-relaxed font-sans shrink-0">
-                    <div className="flex items-center gap-1.5 text-emerald-400 font-bold uppercase font-mono text-[9px] mb-1">
-                      <Shield className="h-3.5 w-3.5" /> A.U.R.A. System Check
-                    </div>
-                    <p>
-                      {trackingOrder
-                        ? trackingOrder.status === 'pending'
-                          ? 'Your order is queued in the logistics network. Waiting for a courier driver to claim the route coordinates.'
-                          : trackingOrder.status === 'in_transit'
-                            ? `Transit vehicle (${trackingOrder.vehicle}) is executing optimal routing. Radar maps show stable coordinate speed.`
-                            : 'Delivery logged. Check habitation sector docking ports for thermal package containment.'
-                        : 'Switch to A.U.R.A. tab to use voice commands to set vehicle, weather, and delivery sector.'}
-                    </p>
-                  </div>
-                </motion.div>
-              ) : (
-                <motion.div
-                  key="aura"
-                  initial={{ opacity: 0, x: 20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -20 }}
-                  transition={{ duration: 0.2 }}
-                  className="h-full"
-                >
-                  <AuraCopilot
-                    vehicle={vehicle}
-                    onVehicle={setVehicle}
-                    weather={weather}
-                    onWeather={setWeather}
-                    traffic={traffic}
-                    onTraffic={setTraffic}
-                    mode={mode}
-                    onMode={setMode}
-                    customerId={customerId}
-                    onCustomerId={setCustomerId}
-                    selectedRestaurant={selectedKitchen}
-                    onOptimize={handlePlaceOrder}
-                    loading={false}
-                    path={trackingOrder?.path ?? []}
-                    distanceRaw={trackingOrder?.distance ?? null}
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-          </div>
+        {/* Right Panel - A.U.R.A. Copilot */}
+        <section className="w-96 shrink-0 flex flex-col h-full z-10">
+          <AuraCopilot
+            vehicle={vehicle}
+            onVehicle={setVehicle}
+            weather={weather}
+            onWeather={setWeather}
+            traffic={traffic}
+            onTraffic={setTraffic}
+            mode={mode}
+            onMode={setMode}
+            customerId={customerId}
+            onCustomerId={setCustomerId}
+            selectedRestaurant={selectedKitchen}
+            onOptimize={handlePlaceOrder}
+            loading={false}
+            path={trackingOrder?.path ?? []}
+            distanceRaw={trackingOrder?.distance ?? null}
+          />
         </section>
       </main>
     </div>
